@@ -27,6 +27,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   Real press0   = pin->GetOrAddReal("problem", "press0", 1.e6);
   Real rho0   = pin->GetOrAddReal("problem", "rho0", 1.e-4);
   Real gamma = peos->GetGamma();
+  Real rotation_period = pin->GetOrAddReal("problem", "rotation_period", 8.64e4)
 //  Real rb = 7.0e9
 //  Real K = press0/pow(rho0,gamma)
 //  Real Kcrit = gm*(gamma-1)/(gamma*pow(rho0,gamma-1))
@@ -74,9 +75,6 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   Real Qzy = 0.0;
   Real Qtotal = 0.0;
   
-  
-    
-
     
     
   for (int k=ks; k<=ke; k++) {
@@ -139,40 +137,36 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
       //Qzy
         Real calc_Qzy = calc_mass*z_polar*y_polar;
         Qzy = Qzy + calc_Qzy;
-          
-        
             
       }
     }
   }
     
-  
+    
+
+    
+  // Calc quadrapole moments
     cout << "mass =" << total_mass << "\n";
     
     cout << "Exact mass = " << exact_mass << "\n";
     
     cout << "Qxx = " << Qxx << "\n";
-    
-    cout << "Qxx alt calculation = " << Qxx_calculation << "\n";
-    
-    cout << "Qxy = " << Qxy << "\n";
-    
-    cout << "Qxz = " << Qxz << "\n";
-    
-    cout << "Qxz/Exact mass = " << Qxz/exact_mass << "\n";
-    
+//    
+//    cout << "Qxy = " << Qxy << "\n";
+//    
+//    cout << "Qxz = " << Qxz << "\n";
     
     cout << "Qyy = " << Qyy << "\n" ;
-    
-    cout << "Qyx = " << Qyx << "\n";
-    
-    cout << "Qyz = " << Qyz << "\n";
+//    
+//    cout << "Qyx = " << Qyx << "\n";
+//    
+//    cout << "Qyz = " << Qyz << "\n";
     
     cout << "Qzz = " << Qzz << "\n";
     
-    cout << "Qzx = " << Qzx << "\n";
-    
-    cout << "Qzy = " << Qzy << "\n";
+//    cout << "Qzx = " << Qzx << "\n";
+//    
+//    cout << "Qzy = " << Qzy << "\n";
   
     
     
