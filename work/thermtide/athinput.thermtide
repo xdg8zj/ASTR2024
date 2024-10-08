@@ -1,6 +1,6 @@
 <comment>
 problem   = thermal tides in spherical coordinates
-configure = --prob=thermtide --coord=spherical_polar --eos = isothermal
+configure = --prob=thermtide --eos = isothermal
 cgs units
 
 <job>
@@ -47,4 +47,4 @@ press0        = 1.e6          # initial pressure
 rho0	      = 1.e-4	      # mass density P = rho * a^2 consistent with given P and a
 			      # for P=1.e6 and rho=1.e-4, cs=1.e5 is the sound speed
 			      # rmax-rmin=1.e8, and so sound cross time is 1.e3sec
-rotation_period = 8.64e4 # rotation period of one day
+rotation_period = 8.64e4  rotation period of one day

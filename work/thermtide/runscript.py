@@ -12,7 +12,7 @@ pgenfile = 'thermtide.cpp'
 def compile():
  shutil.copy(pgenfile,pgendir + '/' + pgenfile)
  os.chdir(athenadir)
- os.system('python3 configure.py --prob thermtide --coord spherical_polar --eos isothermal --ccmd /usr/bin/g++') 
+ os.system('python3 configure.py --prob thermtide --coord spherical_polar --ccmd /usr/bin/g++')
  os.system('make clean')
  os.system('make')
  os.chdir(workdir)

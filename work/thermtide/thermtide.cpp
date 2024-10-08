@@ -27,7 +27,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   Real press0   = pin->GetOrAddReal("problem", "press0", 1.e6);
   Real rho0   = pin->GetOrAddReal("problem", "rho0", 1.e-4);
   Real gamma = peos->GetGamma();
-  Real rotation_period = pin->GetOrAddReal("problem", "rotation_period", 8.64e4)
+  Real rotation_period = pin->GetOrAddReal("problem", "rotation_period", 8.64e4);
 //  Real rb = 7.0e9
 //  Real K = press0/pow(rho0,gamma)
 //  Real Kcrit = gm*(gamma-1)/(gamma*pow(rho0,gamma-1))
@@ -56,9 +56,9 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   }
    
   
-  Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
+  //Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
     
-    Real Qxx_calculation = (4.0*M_PI/15.0)*rho0*((pow(pcoord-> x1f(ie+1),5))-(pow(pcoord-> x1f(is),5)));
+  Real Qxx_calculation = (4.0*M_PI/15.0)*rho0*((pow(pcoord-> x1f(ie+1),5))-(pow(pcoord-> x1f(is),5)));
     
   Real total_mass = 0.0;
     
@@ -143,11 +143,31 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   }
     
     
+  Real Spin_z = 0.0;
+  for (int k=ks; k<=ke; k++) {
+    for (int j=js; j<=je; j++) {
+      for (int i=is; i<=ie; i++) {
+        Real x1volr = 1.0/3.0 * (pow(pcoord-> x1f(i+1),3.0) - pow(pcoord-> x1f(i),3.0));
+        Real x2volt = cos(pcoord-> x2f(j)) - cos(pcoord-> x2f(j+1.0));
+        Real x3volp = pcoord-> x3f(k+1.0) - pcoord-> x3f(k);
+        Real volume = x1volr*x2volt*x3volp;
+        Real calc_mass = phydro->u(IDN,k,j,i)*volume;
+        Real calc_spin = calc_mass*pcoord-> x1f(i)*sin(pcoord-> x2f(j))*x3volp;
+        Spin_z = Spin_z+ calc_spin;
+           
+      }
+    }
+  }
+          
+          
+    
+    
 
     
   // Calc quadrapole moments
     cout << "mass =" << total_mass << "\n";
     
+    Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
     cout << "Exact mass = " << exact_mass << "\n";
     
     cout << "Qxx = " << Qxx << "\n";
@@ -169,11 +189,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 //    cout << "Qzy = " << Qzy << "\n";
   
     
-    
-    
-//    cout << "Qtotal = " << Qtotal << "\n";
-    
-//    cout << "Qtotal/ml^2 = " << Qtotal;
+    cout << "Spin(z) = " << Spin_z << "\n";
 
     
     
