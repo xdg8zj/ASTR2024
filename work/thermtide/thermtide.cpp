@@ -164,25 +164,30 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
     
 
     
-  // Calc quadrapole moments
+  // Calc quadrapole moments 256 nodes
     cout << "mass =" << total_mass << "\n";
+    //mass =6.24591e+24
     
     Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
     cout << "Exact mass = " << exact_mass << "\n";
+    //Exact mass = 6.24591e+24
     
     cout << "Qxx = " << Qxx << "\n";
-//    
+    //Qxx = 1.03479e+44
+//
 //    cout << "Qxy = " << Qxy << "\n";
 //    
 //    cout << "Qxz = " << Qxz << "\n";
     
     cout << "Qyy = " << Qyy << "\n" ;
-//    
+    //Qyy = 1.03479e+44
+//
 //    cout << "Qyx = " << Qyx << "\n";
 //    
 //    cout << "Qyz = " << Qyz << "\n";
     
     cout << "Qzz = " << Qzz << "\n";
+    //Qzz = 1.03487e+44
     
 //    cout << "Qzx = " << Qzx << "\n";
 //    
@@ -190,6 +195,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   
     
     cout << "Spin(z) = " << Spin_z << "\n";
+    //Spin(z) = 8.48801e+32
 
     
     

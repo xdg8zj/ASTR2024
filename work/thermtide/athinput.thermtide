@@ -20,19 +20,19 @@ xorder      = 2         # order of spatial reconstruction
 ncycle_out  = 1         # interval for stdout summary info
 
 <mesh>
-nx1        = 64         # Number of zones in X1-direction
+nx1        = 128         # Number of zones in X1-direction
 x1min      = 7.e9        # minimum value of X1
 x1max      = 7.1e9        # maximum value of X1
 ix1_bc     = reflecting    # inner-X1 boundary flag
 ox1_bc     = reflecting    # outer-X1 boundary flag
 
-nx2        = 64             # Number of zones in X2-direction
+nx2        = 128             # Number of zones in X2-direction
 x2min      = 0.0	    # minimum value of X2
 x2max      = 3.1415926535897931  # maximum value of X2
 ix2_bc     = polar        # inner-X2 boundary flag
 ox2_bc     = polar        # outer-X2 boundary flag
 
-nx3        = 64                # Number of zones in X3-direction
+nx3        = 128               # Number of zones in X3-direction
 x3min      = 0.0	       # minimum value of X3
 x3max      = 6.283185307179586 # maximum value of X3
 ix3_bc     = periodic           # inner-X3 boundary flag
@@ -47,4 +47,4 @@ press0        = 1.e6          # initial pressure
 rho0	      = 1.e-4	      # mass density P = rho * a^2 consistent with given P and a
 			      # for P=1.e6 and rho=1.e-4, cs=1.e5 is the sound speed
 			      # rmax-rmin=1.e8, and so sound cross time is 1.e3sec
-rotation_period = 8.64e4 # rotation period of one day
+rotation_period = 8.64e4 # rotation period of one day 
