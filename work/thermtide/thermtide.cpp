@@ -21,17 +21,38 @@ using namespace std;
 #include "../mesh/mesh.hpp"
 #include "../parameter_input.hpp"
 
+//void Cooling(MeshBlock *pmb, const Real itme, const Real dt, const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar, const AthenaArray<Real> &bcc, AthenaArray<Real> &cons, AthenaArray<Real> &cons_scalar) {
+//  Real gamma = pmb->peos->GetGamma();
+//  Real temp_goal = 10.0;
+//  Real tau = pin->GetOrAddReal("problem", "rotation_period", 8.64e4);
+//    for (int k = pmb->ks; k<= pmb->ke; ++k) {
+//      for (int j = pmb->js; j <= pmb->je; ++j{
+//        for (int i = pmb->is; i <=pmb->ie; ++i){
+//          Real temp = prim(IPR,k,j,i)/prim(IDN,k,j,i);
+//            if (temp > temp_goal) {
+//                cons(IEN,k,j,i) -= dt/tau*prim(IDN,k,j,i)*(temp-temp_goal)/(gamma - 1.0)
+//            }
+//        }
+//    }
+//    
+//}
+
+//Real HistFunc(MeshBlock *pmb, int iout);
+
 void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
   Real gm = pin->GetOrAddReal("problem","GM",0.0);
   Real press0   = pin->GetOrAddReal("problem", "press0", 1.e6);
   Real rho0   = pin->GetOrAddReal("problem", "rho0", 1.e-4);
   Real gamma = peos->GetGamma();
-  Real rotation_period = pin->GetOrAddReal("problem", "rotation_period", 8.64e4);
-//  Real rb = 7.0e9
+  Real Omega0 = pin->GetOrAddReal("orbital_advection","Omega0",7.27220521664303958333e-5);
+  Real tau = pin->GetOrAddReal("problem", "rotation_period", 8.64e4);
+//
+  Real rb = pcoord-> x1f(0);
 //  Real K = press0/pow(rho0,gamma)
 //  Real Kcrit = gm*(gamma-1)/(gamma*pow(rho0,gamma-1))
-  
+    
+  Real asq = press0/rho0;
 
   for (int k=ks; k<=ke; k++) {
     for (int j=js; j<=je; j++) {
@@ -41,8 +62,8 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
           // rho = rhob * pow( (1.0/rratio + Kratio - 1.0)/Kratio, 1.0/(gamma-1.0) );
           // rho = pow( (gm*(gamma-1.0))/(K*gamma*r), 1.0/(gamma-1.0) );
           // press = K * pow(rho,gamma);
-//        Real rho = rhob * exp( (gm/asq/rb)*(rb/r-1.0) );
-//        Real press = asq * rho;
+        Real rho = rho0 * exp( (gm/asq/r)*(rb/r-1.0) );
+        Real press = asq * rho;
         phydro->u(IDN,k,j,i) = rho0; //density
         phydro->u(IM1,k,j,i) = 0.0;
         phydro->u(IM2,k,j,i) = 0.0;
@@ -175,23 +196,23 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
     cout << "Qxx = " << Qxx << "\n";
     //Qxx = 1.03479e+44
 //
-//    cout << "Qxy = " << Qxy << "\n";
+    cout << "Qxy = " << Qxy << "\n";
 //    
-//    cout << "Qxz = " << Qxz << "\n";
+    cout << "Qxz = " << Qxz << "\n";
     
     cout << "Qyy = " << Qyy << "\n" ;
     //Qyy = 1.03479e+44
 //
-//    cout << "Qyx = " << Qyx << "\n";
+    cout << "Qyx = " << Qyx << "\n";
 //    
-//    cout << "Qyz = " << Qyz << "\n";
+    cout << "Qyz = " << Qyz << "\n";
     
     cout << "Qzz = " << Qzz << "\n";
     //Qzz = 1.03487e+44
     
-//    cout << "Qzx = " << Qzx << "\n";
+    cout << "Qzx = " << Qzx << "\n";
 //    
-//    cout << "Qzy = " << Qzy << "\n";
+    cout << "Qzy = " << Qzy << "\n";
   
     
     cout << "Spin(z) = " << Spin_z << "\n";
@@ -200,5 +221,88 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
     
     
     
+}
+
+void Mesh::InitUserMeshData(ParameterInput *pin)
+    {
+      AllocateUserHistoryOutput(10);
+      EnrollUserHistoryOutput(0, HistFunc, "mass");
+      EnrollUserHistoryOutput(1, HistFunc, "Qxx");
+      EnrollUserHistoryOutput(2, HistFunc, "Qxy");
+      EnrollUserHistoryOutput(3, HistFunc, "Qxz");
+      EnrollUserHistoryOutput(4, HistFunc, "Qyx");
+      EnrollUserHistoryOutput(5, HistFunc, "Qyy");
+      EnrollUserHistoryOutput(6, HistFunc, "Qyz");
+      EnrollUserHistoryOutput(7, HistFunc, "Qzx");
+      EnrollUserHistoryOutput(8, HistFunc, "Qzy");
+      EnrollUserHistoryOutput(9, HistFunc, "Qzz");
+      return;
+    }
+
+
+Real HistFunc(MeshBlock *pmb, int iout)
+{
+  int is=pmb->is, ie=pmb->ie, js=pmb->js, je=pmb->je, ks=pmb->ks, ke=pmb->ke;
+  Real mass,Qxx,Qxy,Qxz,Qyx,Qyy,Qyz,Qzx,Qzy,Qzz;
+  mass=0.0;
+  Qxx=0.0;
+  Qxy=0.0;
+  Qxz=0.0;
+  Qyx=0.0;
+  Qyy=0.0;
+  Qyz=0.0;
+  Qzx=0.0;
+  Qzy=0.0;
+  Qzz=0.0;
+
+  for (int k=ks; k<=ke; k++) {
+    for (int j=js; j<=je; j++) {
+      for (int i=is; i<=ie; i++) {
+        Real r = pmb->pcoord->x1v(i);
+        Real theta = pmb->pcoord->x2v(j);
+        Real phi = pmb->pcoord->x3v(k);
+        Real x = r*sin(theta)*cos(phi);
+        Real y = r*sin(theta)*sin(phi);
+        Real z = r*cos(theta);
+        Real rho = pmb->phydro->u(IDN,k,j,i);
+        Real dvol = (pow(pmb->pcoord->x1f(i+1),3)-pow(pmb->pcoord->x1f(i),3))/3.0 \
+        * (cos(pmb->pcoord->x2f(j))-cos(pmb->pcoord->x2f(j+1))) \
+        * (pmb->pcoord->x3f(k+1)-pmb->pcoord->x3f(k));
+        mass = mass + rho * dvol;
+        Qxx = Qxx + rho * dvol * pow(x,2);
+        Qxy = Qxy + rho * dvol * x*y;
+        Qxz = Qxz + rho * dvol * x*z;
+        Qyx = Qyx + rho * dvol * y*x;
+        Qyy = Qyy + rho * dvol * pow(y,2);
+        Qyz = Qyz + rho * dvol * y*z;
+        Qzx = Qzx + rho * dvol * z*x;
+        Qzy = Qzy + rho * dvol * z*y;
+        Qzz = Qzz + rho * dvol * pow(z,2);
+      }
+    }
+  }
+  if (iout==0){
+    return mass;
+  } else if (iout==1){
+    return Qxx;
+  } else if (iout==2){
+    return Qxy;
+  } else if (iout==3){
+    return Qxz;
+  } else if (iout==4){
+    return Qyx;
+  } else if (iout==5){
+    return Qyy;
+  } else if (iout==6){
+    return Qyz;
+  } else if (iout==7){
+    return Qzx;
+  } else if (iout==8){
+    return Qzy;
+  } else if (iout==9){
+    return Qzz;
+  } else {
+    return 0.0;
+  }
 }
 

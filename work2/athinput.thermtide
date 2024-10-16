@@ -1,0 +1,58 @@
+<comment>
+problem   = thermal tides in spherical coordinates
+configure = --prob=thermtide --coord=spherical_polar
+cgs units
+
+<job>
+problem_id = thermtide      # problem ID: basename of output filenames
+
+<output1>
+file_type  = vtk        # Binary data dump
+variable   = prim       # variables to be output
+dt         = 1.e2       # time increment between outputs
+
+<output2>
+file_type   = hst       # History data dump
+dt          = 0.01      # time increment between outputs
+data_format = %12.5e    # Optional data format string
+
+<time>
+cfl_number = 0.3        # The Courant, Friedrichs, & Lewy (CFL) Number
+nlim       = -1         # cycle limit
+tlim       = 10.0 	#2.e3       # time limit
+integrator  = vl2       # time integration algorithm
+xorder      = 2         # order of spatial reconstruction
+ncycle_out  = 1         # interval for stdout summary info
+
+<mesh>
+nx1        = 64         # Number of zones in X1-direction
+x1min      = 7.e9        # minimum value of X1
+x1max      = 7.03e9        # maximum value of X1
+ix1_bc     = reflecting    # inner-X1 boundary flag
+ox1_bc     = reflecting    # outer-X1 boundary flag
+
+nx2        = 64             # Number of zones in X2-direction
+x2min      = 0.0	    # minimum value of X2
+x2max      = 3.1415926535897931  # maximum value of X2
+ix2_bc     = polar        # inner-X2 boundary flag
+ox2_bc     = polar        # outer-X2 boundary flag
+
+nx3        = 64                # Number of zones in X3-direction
+x3min      = 0.0	       # minimum value of X3
+x3max      = 6.283185307179586 # maximum value of X3
+ix3_bc     = periodic           # inner-X3 boundary flag
+ox3_bc     = periodic           # outer-X3 boundary flag
+
+<hydro>
+gamma           = 1.4		# gamma = C_p/C_v
+
+<orbital_advection>
+Omega0        = 0.e0         # angular frequency of rotation in rad/s
+
+<problem>
+GM	      = 1.3e23	      # mass of planet 
+pressb        = 1.e6          # initial base pressure
+rhob	      = 1.e-4	      # initial mass density at the base
+			      # P = rho * a^2 consistent with given P and a
+			      # for P=1.e6 and rho=1.e-4, cs=1.e5 is the sound speed
+			      # rmax-rmin=1.e8, and so sound cross time is 1.e3sec
