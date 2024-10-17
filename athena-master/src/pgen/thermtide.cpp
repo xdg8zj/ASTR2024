@@ -21,23 +21,27 @@ using namespace std;
 #include "../mesh/mesh.hpp"
 #include "../parameter_input.hpp"
 
-//void Cooling(MeshBlock *pmb, const Real itme, const Real dt, const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar, const AthenaArray<Real> &bcc, AthenaArray<Real> &cons, AthenaArray<Real> &cons_scalar) {
-//  Real gamma = pmb->peos->GetGamma();
-//  Real temp_goal = 10.0;
-//  Real tau = pin->GetOrAddReal("problem", "rotation_period", 8.64e4);
-//    for (int k = pmb->ks; k<= pmb->ke; ++k) {
-//      for (int j = pmb->js; j <= pmb->je; ++j{
-//        for (int i = pmb->is; i <=pmb->ie; ++i){
-//          Real temp = prim(IPR,k,j,i)/prim(IDN,k,j,i);
-//            if (temp > temp_goal) {
-//                cons(IEN,k,j,i) -= dt/tau*prim(IDN,k,j,i)*(temp-temp_goal)/(gamma - 1.0)
-//            }
-//        }
-//    }
-//    
-//}
-
 Real HistFunc(MeshBlock *pmb, int iout);
+
+void Cooling(MeshBlock *pmb, const Real itme, const Real dt, const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar, const AthenaArray<Real> &bcc, AthenaArray<Real> &cons, AthenaArray<Real> &cons_scalar) {
+  Real gamma = pmb->peos->GetGamma();
+  Real temp_goal = 1.e5;
+  Real tau = 8.64e4;
+    for (int k = pmb->ks; k<= pmb->ke; ++k) {
+        for (int j = pmb->js; j <= pmb->je; ++j) {
+            for (int i = pmb->is; i <=pmb->ie; ++i){
+                Real mu_atm = 2.35;
+                Real mp = 1.67262192595e-24; //mass of proton in grams from physics.nist.gov
+                Real kb = 1.3807e-16 ; //boltzmann's constant from physics.rutgers.edu in cgs
+                Real temp = (prim(IPR,k,j,i)*mu_atm*mp)/(prim(IDN,k,j,i)*kb);
+                if (temp > temp_goal) {
+                    cons(IEN,k,j,i) -= dt/tau*prim(IDN,k,j,i)*(temp-temp_goal)/(gamma - 1.0);
+                }
+            }
+        }
+    }
+}
+
 
 void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
@@ -236,6 +240,7 @@ void Mesh::InitUserMeshData(ParameterInput *pin)
       EnrollUserHistoryOutput(7, HistFunc, "Qzx");
       EnrollUserHistoryOutput(8, HistFunc, "Qzy");
       EnrollUserHistoryOutput(9, HistFunc, "Qzz");
+      EnrollUserExplicitSourceFunction(Cooling);
       return;
     }
 
