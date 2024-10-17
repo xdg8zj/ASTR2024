@@ -21,7 +21,23 @@ using namespace std;
 #include "../mesh/mesh.hpp"
 #include "../parameter_input.hpp"
 
-//Real HistFunc(MeshBlock *pmb, int iout);
+//void Cooling(MeshBlock *pmb, const Real itme, const Real dt, const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar, const AthenaArray<Real> &bcc, AthenaArray<Real> &cons, AthenaArray<Real> &cons_scalar) {
+//  Real gamma = pmb->peos->GetGamma();
+//  Real temp_goal = 10.0;
+//  Real tau = pin->GetOrAddReal("problem", "rotation_period", 8.64e4);
+//    for (int k = pmb->ks; k<= pmb->ke; ++k) {
+//      for (int j = pmb->js; j <= pmb->je; ++j{
+//        for (int i = pmb->is; i <=pmb->ie; ++i){
+//          Real temp = prim(IPR,k,j,i)/prim(IDN,k,j,i);
+//            if (temp > temp_goal) {
+//                cons(IEN,k,j,i) -= dt/tau*prim(IDN,k,j,i)*(temp-temp_goal)/(gamma - 1.0)
+//            }
+//        }
+//    }
+//    
+//}
+
+Real HistFunc(MeshBlock *pmb, int iout);
 
 void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
@@ -61,7 +77,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   }
    
   
-  //Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
+//  Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
     
   Real Qxx_calculation = (4.0*M_PI/15.0)*rho0*((pow(pcoord-> x1f(ie+1),5))-(pow(pcoord-> x1f(is),5)));
     
@@ -207,86 +223,86 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
     
 }
 
-//void Mesh::InitUserMeshData(ParameterInput *pin)
-//    {
-//      AllocateUserHistoryOutput(10);
-//      EnrollUserHistoryOutput(0, HistFunc, "mass");
-//      EnrollUserHistoryOutput(1, HistFunc, "Qxx");
-//      EnrollUserHistoryOutput(2, HistFunc, "Qxy");
-//      EnrollUserHistoryOutput(3, HistFunc, "Qxz");
-//      EnrollUserHistoryOutput(4, HistFunc, "Qyx");
-//      EnrollUserHistoryOutput(5, HistFunc, "Qyy");
-//      EnrollUserHistoryOutput(6, HistFunc, "Qyz");
-//      EnrollUserHistoryOutput(7, HistFunc, "Qzx");
-//      EnrollUserHistoryOutput(8, HistFunc, "Qzy");
-//      EnrollUserHistoryOutput(9, HistFunc, "Qzz");
-//      return;
-//    }
-//
-//
-//Real HistFunc(MeshBlock *pmb, int iout)
-//{
-//  int is=pmb->is, ie=pmb->ie, js=pmb->js, je=pmb->je, ks=pmb->ks, ke=pmb->ke;
-//  Real mass,Qxx,Qxy,Qxz,Qyx,Qyy,Qyz,Qzx,Qzy,Qzz;
-//  mass=0.0;
-//  Qxx=0.0;
-//  Qxy=0.0;
-//  Qxz=0.0;
-//  Qyx=0.0;
-//  Qyy=0.0;
-//  Qyz=0.0;
-//  Qzx=0.0;
-//  Qzy=0.0;
-//  Qzz=0.0;
-//
-//  for (int k=ks; k<=ke; k++) {
-//    for (int j=js; j<=je; j++) {
-//      for (int i=is; i<=ie; i++) {
-//        Real r = pmb->pcoord->x1v(i);
-//        Real theta = pmb->pcoord->x2v(j);
-//        Real phi = pmb->pcoord->x3v(k);
-//        Real x = r*sin(theta)*cos(phi);
-//        Real y = r*sin(theta)*sin(phi);
-//        Real z = r*cos(theta);
-//        Real rho = pmb->phydro->u(IDN,k,j,i);
-//        Real dvol = (pow(pmb->pcoord->x1f(i+1),3)-pow(pmb->pcoord->x1f(i),3))/3.0 \
-//        * (cos(pmb->pcoord->x2f(j))-cos(pmb->pcoord->x2f(j+1))) \
-//        * (pmb->pcoord->x3f(k+1)-pmb->pcoord->x3f(k));
-//        mass = mass + rho * dvol;
-//        Qxx = Qxx + rho * dvol * pow(x,2);
-//        Qxy = Qxy + rho * dvol * x*y;
-//        Qxz = Qxz + rho * dvol * x*z;
-//        Qyx = Qyx + rho * dvol * y*x;
-//        Qyy = Qyy + rho * dvol * pow(y,2);
-//        Qyz = Qyz + rho * dvol * y*z;
-//        Qzx = Qzx + rho * dvol * z*x;
-//        Qzy = Qzy + rho * dvol * z*y;
-//        Qzz = Qzz + rho * dvol * pow(z,2);
-//      }
-//    }
-//  }
-//  if (iout==0){
-//    return mass;
-//  } else if (iout==1){
-//    return Qxx;
-//  } else if (iout==2){
-//    return Qxy;
-//  } else if (iout==3){
-//    return Qxz;
-//  } else if (iout==4){
-//    return Qyx;
-//  } else if (iout==5){
-//    return Qyy;
-//  } else if (iout==6){
-//    return Qyz;
-//  } else if (iout==7){
-//    return Qzx;
-//  } else if (iout==8){
-//    return Qzy;
-//  } else if (iout==9){
-//    return Qzz;
-//  } else {
-//    return 0.0;
-//  }
-//}
-//
+void Mesh::InitUserMeshData(ParameterInput *pin)
+    {
+      AllocateUserHistoryOutput(10);
+      EnrollUserHistoryOutput(0, HistFunc, "mass");
+      EnrollUserHistoryOutput(1, HistFunc, "Qxx");
+      EnrollUserHistoryOutput(2, HistFunc, "Qxy");
+      EnrollUserHistoryOutput(3, HistFunc, "Qxz");
+      EnrollUserHistoryOutput(4, HistFunc, "Qyx");
+      EnrollUserHistoryOutput(5, HistFunc, "Qyy");
+      EnrollUserHistoryOutput(6, HistFunc, "Qyz");
+      EnrollUserHistoryOutput(7, HistFunc, "Qzx");
+      EnrollUserHistoryOutput(8, HistFunc, "Qzy");
+      EnrollUserHistoryOutput(9, HistFunc, "Qzz");
+      return;
+    }
+
+
+Real HistFunc(MeshBlock *pmb, int iout)
+{
+  int is=pmb->is, ie=pmb->ie, js=pmb->js, je=pmb->je, ks=pmb->ks, ke=pmb->ke;
+  Real mass,Qxx,Qxy,Qxz,Qyx,Qyy,Qyz,Qzx,Qzy,Qzz;
+  mass=0.0;
+  Qxx=0.0;
+  Qxy=0.0;
+  Qxz=0.0;
+  Qyx=0.0;
+  Qyy=0.0;
+  Qyz=0.0;
+  Qzx=0.0;
+  Qzy=0.0;
+  Qzz=0.0;
+
+  for (int k=ks; k<=ke; k++) {
+    for (int j=js; j<=je; j++) {
+      for (int i=is; i<=ie; i++) {
+        Real r = pmb->pcoord->x1v(i);
+        Real theta = pmb->pcoord->x2v(j);
+        Real phi = pmb->pcoord->x3v(k);
+        Real x = r*sin(theta)*cos(phi);
+        Real y = r*sin(theta)*sin(phi);
+        Real z = r*cos(theta);
+        Real rho = pmb->phydro->u(IDN,k,j,i);
+        Real dvol = (pow(pmb->pcoord->x1f(i+1),3)-pow(pmb->pcoord->x1f(i),3))/3.0 \
+        * (cos(pmb->pcoord->x2f(j))-cos(pmb->pcoord->x2f(j+1))) \
+        * (pmb->pcoord->x3f(k+1)-pmb->pcoord->x3f(k));
+        mass = mass + rho * dvol;
+        Qxx = Qxx + rho * dvol * pow(x,2);
+        Qxy = Qxy + rho * dvol * x*y;
+        Qxz = Qxz + rho * dvol * x*z;
+        Qyx = Qyx + rho * dvol * y*x;
+        Qyy = Qyy + rho * dvol * pow(y,2);
+        Qyz = Qyz + rho * dvol * y*z;
+        Qzx = Qzx + rho * dvol * z*x;
+        Qzy = Qzy + rho * dvol * z*y;
+        Qzz = Qzz + rho * dvol * pow(z,2);
+      }
+    }
+  }
+  if (iout==0){
+    return mass;
+  } else if (iout==1){
+    return Qxx;
+  } else if (iout==2){
+    return Qxy;
+  } else if (iout==3){
+    return Qxz;
+  } else if (iout==4){
+    return Qyx;
+  } else if (iout==5){
+    return Qyy;
+  } else if (iout==6){
+    return Qyz;
+  } else if (iout==7){
+    return Qzx;
+  } else if (iout==8){
+    return Qzy;
+  } else if (iout==9){
+    return Qzz;
+  } else {
+    return 0.0;
+  }
+}
+

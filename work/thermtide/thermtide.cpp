@@ -37,7 +37,7 @@ using namespace std;
 //    
 //}
 
-//Real HistFunc(MeshBlock *pmb, int iout);
+Real HistFunc(MeshBlock *pmb, int iout);
 
 void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
@@ -77,7 +77,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   }
    
   
-  //Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
+//  Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
     
   Real Qxx_calculation = (4.0*M_PI/15.0)*rho0*((pow(pcoord-> x1f(ie+1),5))-(pow(pcoord-> x1f(is),5)));
     

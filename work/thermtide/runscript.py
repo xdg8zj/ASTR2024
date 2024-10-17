@@ -4,7 +4,7 @@ import os
 import shutil
 import sys
 
-workdir = '/Users/aleynaloughran-pierce/Desktop/ASTR2024/work'
+workdir = '/Users/aleynaloughran-pierce/Desktop/ASTR2024/work/thermtide'
 athenadir = '/Users/aleynaloughran-pierce/Desktop/ASTR2024/athena-master'
 pgendir = '/Users/aleynaloughran-pierce/Desktop/ASTR2024/athena-master/src/pgen'
 pgenfile = 'thermtide.cpp'
@@ -44,7 +44,7 @@ def main():
  configure()
  compile()
  run()
- cleanpgenfile()
+ #cleanpgenfile()
 
 if __name__ == '__main__':
  main()
