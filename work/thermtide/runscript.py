@@ -23,10 +23,7 @@ def configure():
 def compile():
  shutil.copy(pgenfile,pgendir + '/' + pgenfile)
  os.chdir(athenadir)
- #os.system('python3 configure.py --prob=thermtide --coord=spherical_polar --ccmd=/usr/bin/g++') 
- #os.system('python3 configure.py -mpi -hdf5 --prob=thermtide --coord=spherical_polar --mpiccmd=/opt/homebrew/bin/mpicc --hdf5_path=/opt/homebrew/Cellar/hdf5-mpi/1.14.3') 
- #os.system('python3 configure.py -mpi --prob=thermtide --coord=spherical_polar --mpiccmd=/opt/homebrew/bin/mpicc') 
- os.system('make clean')
+ #os.system('make clean')
  os.system('make')
  os.chdir(workdir)
 

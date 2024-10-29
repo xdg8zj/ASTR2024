@@ -21,58 +21,53 @@ using namespace std;
 #include "../mesh/mesh.hpp"
 #include "../parameter_input.hpp"
 
+Real tau0, press0;
+Real mu=2.3;
+Real amu=1.67262192595e-24;
+Real kboltz=1.3807e-16;
+Real ndof=5.0;
+
 Real HistFunc(MeshBlock *pmb, int iout);
 
-void Cooling(MeshBlock *pmb, const Real itme, const Real dt, const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar, const AthenaArray<Real> &bcc, AthenaArray<Real> &cons, AthenaArray<Real> &cons_scalar) {
-  Real gamma = pmb->peos->GetGamma();
-  Real temp_goal = 1.e5;
-  Real tau = 8.64e4;
-    for (int k = pmb->ks; k<= pmb->ke; ++k) {
-        for (int j = pmb->js; j <= pmb->je; ++j) {
-            for (int i = pmb->is; i <=pmb->ie; ++i){
-                Real mu_atm = 2.35;
-                Real mp = 1.67262192595e-24; //mass of proton in grams from physics.nist.gov
-                Real kb = 1.3807e-16 ; //boltzmann's constant from physics.rutgers.edu in cgs
-                Real temp = (prim(IPR,k,j,i)*mu_atm*mp)/(prim(IDN,k,j,i)*kb);
-                if (temp > temp_goal) {
-                    cons(IEN,k,j,i) -= dt/tau*prim(IDN,k,j,i)*(temp-temp_goal)/(gamma - 1.0);
-                }
-            }
-        }
-    }
-}
+void NewtonianCooling(MeshBlock *pmb, const Real time, const Real dt,
+              const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar,
+              const AthenaArray<Real> &bcc, AthenaArray<Real> &cons,
+              AthenaArray<Real> &cons_scalar);
 
 
 void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
   Real gm = pin->GetOrAddReal("problem","GM",0.0);
-  Real press0   = pin->GetOrAddReal("problem", "press0", 1.e6);
-  Real rho0   = pin->GetOrAddReal("problem", "rho0", 1.e-4);
+  Real pressb   = pin->GetOrAddReal("problem", "pressb", 1.e6);
+  Real rhob   = pin->GetOrAddReal("problem", "rhob", 1.e-4);
+  tau0   = pin->GetOrAddReal("problem", "tau0", 1.e5);
+  press0   = pin->GetOrAddReal("problem", "press0", 1.e3);
   Real gamma = peos->GetGamma();
-  Real Omega0 = pin->GetOrAddReal("orbital_advection","Omega0",7.27220521664303958333e-5);
-  Real tau = pin->GetOrAddReal("problem", "rotation_period", 8.64e4);
-//
   Real rb = pcoord-> x1f(0);
 //  Real K = press0/pow(rho0,gamma)
 //  Real Kcrit = gm*(gamma-1)/(gamma*pow(rho0,gamma-1))
+  Real asq = pressb/rhob;
+  cout << "sqrt(GM/a^2 rb)= " << sqrt(gm/asq/rb) << endl;
     
-  Real asq = press0/rho0;
-
+ 
+  Real rho, press;
+  Real r;
+    
   for (int k=ks; k<=ke; k++) {
     for (int j=js; j<=je; j++) {
       for (int i=is; i<=ie; i++) {
-        Real r = pcoord->x1v(i);
+        r = pcoord->x1v(i);
           // rratio = r/rb;
           // rho = rhob * pow( (1.0/rratio + Kratio - 1.0)/Kratio, 1.0/(gamma-1.0) );
           // rho = pow( (gm*(gamma-1.0))/(K*gamma*r), 1.0/(gamma-1.0) );
           // press = K * pow(rho,gamma);
-        Real rho = rho0 * exp( (gm/asq/r)*(rb/r-1.0) );
-        Real press = asq * rho;
-        phydro->u(IDN,k,j,i) = rho0; //density
+        rho = rhob * exp( (gm/asq/r)*(rb/r-1.0) );
+        press = asq * rho;
+        phydro->u(IDN,k,j,i) = rho; //density
         phydro->u(IM1,k,j,i) = 0.0;
         phydro->u(IM2,k,j,i) = 0.0;
         phydro->u(IM3,k,j,i) = 0.0;
-        phydro->u(IEN,k,j,i) = press0/(gamma-1.0);
+        phydro->u(IEN,k,j,i) = press/(gamma-1.0);
         Real rad;
 
 
@@ -83,7 +78,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
   
 //  Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
     
-  Real Qxx_calculation = (4.0*M_PI/15.0)*rho0*((pow(pcoord-> x1f(ie+1),5))-(pow(pcoord-> x1f(is),5)));
+  Real Qxx_calculation = (4.0*M_PI/15.0)*rho*((pow(pcoord-> x1f(ie+1),5))-(pow(pcoord-> x1f(is),5)));
     
   Real total_mass = 0.0;
     
@@ -167,60 +162,60 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
     }
   }
     
-    
-  Real Spin_z = 0.0;
-  for (int k=ks; k<=ke; k++) {
-    for (int j=js; j<=je; j++) {
-      for (int i=is; i<=ie; i++) {
-        Real x1volr = 1.0/3.0 * (pow(pcoord-> x1f(i+1),3.0) - pow(pcoord-> x1f(i),3.0));
-        Real x2volt = cos(pcoord-> x2f(j)) - cos(pcoord-> x2f(j+1.0));
-        Real x3volp = pcoord-> x3f(k+1.0) - pcoord-> x3f(k);
-        Real volume = x1volr*x2volt*x3volp;
-        Real calc_mass = phydro->u(IDN,k,j,i)*volume;
-        Real calc_spin = calc_mass*pcoord-> x1f(i)*sin(pcoord-> x2f(j))*x3volp;
-        Spin_z = Spin_z+ calc_spin;
-           
-      }
-    }
-  }
+//    
+//  Real Spin_z = 0.0;
+//  for (int k=ks; k<=ke; k++) {
+//    for (int j=js; j<=je; j++) {
+//      for (int i=is; i<=ie; i++) {
+//        Real x1volr = 1.0/3.0 * (pow(pcoord-> x1f(i+1),3.0) - pow(pcoord-> x1f(i),3.0));
+//        Real x2volt = cos(pcoord-> x2f(j)) - cos(pcoord-> x2f(j+1.0));
+//        Real x3volp = pcoord-> x3f(k+1.0) - pcoord-> x3f(k);
+//        Real volume = x1volr*x2volt*x3volp;
+//        Real calc_mass = phydro->u(IDN,k,j,i)*volume;
+//        Real calc_spin = calc_mass*pcoord-> x1f(i)*sin(pcoord-> x2f(j))*x3volp;
+//        Spin_z = Spin_z+ calc_spin;
+//           
+//      }
+//    }
+//  }
           
           
     
     
 
     
-  // Calc quadrapole moments 256 nodes
-    cout << "mass =" << total_mass << "\n";
-    //mass =6.24591e+24
-    
-    Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
-    cout << "Exact mass = " << exact_mass << "\n";
-    //Exact mass = 6.24591e+24
-    
-    cout << "Qxx = " << Qxx << "\n";
-    //Qxx = 1.03479e+44
-//
-    cout << "Qxy = " << Qxy << "\n";
+//  // Calc quadrapole moments 256 nodes
+//    cout << "mass =" << total_mass << "\n";
+//    //mass =6.24591e+24
 //    
-    cout << "Qxz = " << Qxz << "\n";
-    
-    cout << "Qyy = " << Qyy << "\n" ;
-    //Qyy = 1.03479e+44
-//
-    cout << "Qyx = " << Qyx << "\n";
+//    Real exact_mass = 4.0*M_PI/3.0*((pow(pcoord-> x1f(ie+1),3))-(pow(pcoord-> x1f(is),3)))*rho0;
+//    cout << "Exact mass = " << exact_mass << "\n";
+//    //Exact mass = 6.24591e+24
 //    
-    cout << "Qyz = " << Qyz << "\n";
-    
-    cout << "Qzz = " << Qzz << "\n";
-    //Qzz = 1.03487e+44
-    
-    cout << "Qzx = " << Qzx << "\n";
+//    cout << "Qxx = " << Qxx << "\n";
+//    //Qxx = 1.03479e+44
+////
+//    cout << "Qxy = " << Qxy << "\n";
+////    
+//    cout << "Qxz = " << Qxz << "\n";
 //    
-    cout << "Qzy = " << Qzy << "\n";
-  
-    
-    cout << "Spin(z) = " << Spin_z << "\n";
-    //Spin(z) = 8.48801e+32
+//    cout << "Qyy = " << Qyy << "\n" ;
+//    //Qyy = 1.03479e+44
+////
+//    cout << "Qyx = " << Qyx << "\n";
+////    
+//    cout << "Qyz = " << Qyz << "\n";
+//    
+//    cout << "Qzz = " << Qzz << "\n";
+//    //Qzz = 1.03487e+44
+//    
+//    cout << "Qzx = " << Qzx << "\n";
+////    
+//    cout << "Qzy = " << Qzy << "\n";
+//  
+//    
+//    cout << "Spin(z) = " << Spin_z << "\n";
+//    //Spin(z) = 8.48801e+32
 
     
     
@@ -229,6 +224,7 @@ void MeshBlock::ProblemGenerator(ParameterInput *pin) {
 
 void Mesh::InitUserMeshData(ParameterInput *pin)
     {
+      EnrollUserExplicitSourceFunction(NewtonianCooling);
       AllocateUserHistoryOutput(10);
       EnrollUserHistoryOutput(0, HistFunc, "mass");
       EnrollUserHistoryOutput(1, HistFunc, "Qxx");
@@ -240,7 +236,6 @@ void Mesh::InitUserMeshData(ParameterInput *pin)
       EnrollUserHistoryOutput(7, HistFunc, "Qzx");
       EnrollUserHistoryOutput(8, HistFunc, "Qzy");
       EnrollUserHistoryOutput(9, HistFunc, "Qzz");
-      EnrollUserExplicitSourceFunction(Cooling);
       return;
     }
 
@@ -311,3 +306,24 @@ Real HistFunc(MeshBlock *pmb, int iout)
   }
 }
 
+void NewtonianCooling(MeshBlock *pmb, const Real time, const Real dt,
+             const AthenaArray<Real> &prim, const AthenaArray<Real> &prim_scalar,
+             const AthenaArray<Real> &bcc, AthenaArray<Real> &cons,
+             AthenaArray<Real> &cons_scalar)
+{
+//  Real temp_tot = 0.0;
+  for (int k = pmb->ks; k <= pmb->ke; ++k) {
+    for (int j = pmb->js; j <= pmb->je; ++j) {
+      for (int i = pmb->is; i <= pmb->ie; ++i) {
+        Real Omega0 = 2.42e-5;
+        Real temp_goal = 1.e3 + (1.e5*cos(2.0*(pmb-> pcoord-> x3v(k) -(Omega0*time))));
+        Real temp = mu*amu*prim(IPR,k,j,i) / prim(IDN,k,j,i) / kboltz;
+        Real tau = tau0*(1.0+prim(IPR,k,j,i)/press0);
+        Real Cp = (1.0+ndof/2.0) * kboltz/(mu*amu);
+        cons(IEN,k,j,i) -= dt / tau * prim(IDN,k,j,i) * Cp * (temp - temp_goal);
+//        temp_tot = temp+temp_tot;
+      }
+    }
+  }
+  return;
+}
