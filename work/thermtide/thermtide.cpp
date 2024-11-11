@@ -316,7 +316,7 @@ void NewtonianCooling(MeshBlock *pmb, const Real time, const Real dt,
     for (int j = pmb->js; j <= pmb->je; ++j) {
       for (int i = pmb->is; i <= pmb->ie; ++i) {
         Real Omega0 = 2.42e-5;
-        Real temp_goal = 1.e3 + (1.e5*cos(2.0*(pmb-> pcoord-> x3v(k) -(Omega0*time))));
+        Real temp_goal = 1.e3 + (1.e2*cos(2.0*(pmb-> pcoord-> x3v(k) -(Omega0*time))));
         Real temp = mu*amu*prim(IPR,k,j,i) / prim(IDN,k,j,i) / kboltz;
         Real tau = tau0*(1.0+prim(IPR,k,j,i)/press0);
         Real Cp = (1.0+ndof/2.0) * kboltz/(mu*amu);

@@ -39,8 +39,10 @@ def plot_rad_temp(filenames):
         for k in range(nk):
             for j in range(nj):
                 temp = mu*amu*press[k,j,:]/rho[k,j,:]/kboltz
-                
-        plt.scatter(xc,temp)
+            plt.scatter(xc,temp)
+            
+        plt.xlim(7.0e9,7.1e9)
+        plt.legend()
         plt.show()
 
 
@@ -66,8 +68,9 @@ def plot_rad_temp(filenames):
 #        plt.show()
 #        
 def main():
-    filenames = ['/Users/aleynaloughran-pierce/Desktop/ASTR2024/work/thermtide/thermtide.block0.out1.00012.vtk']
+    filenames = ['thermtide.block0.out1.02000.vtk']
     plot_rad_temp(filenames)
+    
     
 if __name__ == '__main__':
     main()

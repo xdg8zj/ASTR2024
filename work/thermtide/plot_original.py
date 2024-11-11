@@ -17,7 +17,7 @@ def plot_den_x(filenames):
  for fname in filenames:
    x,y,z,data = read_vtk_file(fname)
    rho=data['rho']
-    x1rho = data['x1rho']
+   x1rho = data['x1rho']
     
    n=len(x)-1
    xc=0.5*(x[0:n]+np.roll(x,-1)[0:n])
@@ -37,7 +37,7 @@ def plot_den_x(filenames):
 
 def main():
  #filenames = glob.glob('*.vtk')
- filenames = ['thermtide.block0.out1.00000.vtk']
+ filenames = ['thermtide.block0.out1.01000.vtk']
  #plot_den_x(filenames)
  #plt.close()
  for fname in filenames:

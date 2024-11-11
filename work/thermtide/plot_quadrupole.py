@@ -5,6 +5,7 @@ sys.path.insert(0, '../../athena-master/vis/python')
 import athena_read
 import plot_lines
 import glob
+import math
 
 #data = athena_read.hst('thermtide.hst')
 #print('quadrapole moments {0}'.format(data['Qxx']))
@@ -38,20 +39,35 @@ def plot_quadrupoles(filenames):
     Qzz = data['Qzz']
     print(Qxx)
     print(Qyy)
-    plt.plot(time,Qxx, label = "Qxx", linestyle = "dotted")
+#    plt.plot(time,Qxx, label = "Qxx", linestyle = "dotted")
     plt.plot(time,Qxy, label = "Qxy", linestyle = "dotted")
-    plt.plot(time,Qxz, label = "Qxz", linestyle = "dotted")
-    plt.plot(time,Qyx, label = "Qyx", linestyle = "dotted")
-    plt.plot(time,Qyy, label = "Qyy", linestyle = "dotted")
-    plt.plot(time,Qyz, label = "Qyz", linestyle = "dotted")
-    plt.plot(time,Qzx, label = "Qzx", linestyle = "dotted")
-    plt.plot(time,Qzy, label = "Qzy", linestyle = "dotted")
-    plt.plot(time,Qzz, label = "Qzz", linestyle = "dotted")
-  plt.yscale('log')
+#    plt.plot(time,Qxz, label = "Qxz", linestyle = "dotted")
+#    plt.plot(time,Qyx, label = "Qyx", linestyle = "dotted")
+#    plt.plot(time,Qyy, label = "Qyy", linestyle = "dashed")
+#    plt.plot(time,Qyz, label = "Qyz", linestyle = "dotted")
+#    plt.plot(time,Qzx, label = "Qzx", linestyle = "dotted")
+#    plt.plot(time,Qzy, label = "Qzy", linestyle = "dotted")
+#    plt.plot(time,Qzz, label = "Qzz", linestyle = "dotted")
+    plt.plot(time,Qxx-Qyy, label = "Qxx-Qyy", linestyle = "dotted")
+#    plt.yscale('log')
   plt.title('time of simulation vs log[Quadrupole moments]')
   plt.xlabel('time (s)')
-  plt.ylim(1.e0,1.e50)
+#  plt.ylim(1.e0,1.e50)
   plt.ylabel('log [Quadrupole moments (kg*m^2)] ')
+  plt.legend()
+  plt.show()
+  plt.close()
+  omega0 =2.42e-5
+  
+  torque = 1.5*(omega0**2)*(((Qxx-Qyy)*np.sin(2*omega0*time))-(2*Qxy*np.cos(2*omega0*time)))
+  print(torque)
+  
+  plt.plot(time, torque, label = "Torque", linestyle = "dotted")
+  plt.title('time of simulation vs torque (1,000,000 s)')
+  plt.xlabel('time (s)')
+#  plt.ylim(1.e0,1.e50)
+  plt.ylabel('log [Torque (N-m)] ')
+#  plt.savefig("torque1000000s_245e-5omega0_06.png")
   plt.legend()
   plt.show()
   
